@@ -1,111 +1,73 @@
-"use client";
+"use client"
+import React, { useState } from "react"
+import Link from "next/link"
+import axios from "axios"
+import { useRouter } from "next/navigation"
+import { toast } from "react-hot-toast"
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+export default function LoginPage() {
+  const router = useRouter()
+  const [user, setUser] = useState({ email: "", password: "" })
+  const [loading, setLoading] = useState(false)
 
-const Login = () => {
-  const router = useRouter();
-
-  const [user, setUser] = useState({
-    email: "",
-    password: "",
-  });
-
-  const [buttonDisabled, setButtonDisabled] = useState(true);
-  const [loading, setLoading] = useState(false);
-
-  const onLogin = async () => {
+  const onLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
     try {
-      setLoading(true);
-
-      const response = await axios.post("/api/users/login", user);
-      console.log("Login success", response.data);
-
-      toast.success("Login successful");
-      router.push("/profile");
+      setLoading(true)
+      const response = await axios.post("/api/users/login", user)
+      toast.success("Login successful!")
+      router.push("/profile") // Redirect to profile or dashboard
     } catch (error: any) {
-      console.log("Login failed", error?.response?.data || error.message);
-      toast.error(error?.response?.data?.error || "Login failed");
+      toast.error(error.response?.data?.error || "Invalid credentials")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
-
-  useEffect(() => {
-    if (user.email && user.password) {
-      setButtonDisabled(false);
-    } else {
-      setButtonDisabled(true);
-    }
-  }, [user]);
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-        <h1 className="mb-2 text-center text-3xl font-bold text-gray-800">
-          Welcome Back
-        </h1>
+    <div className="flex min-h-[80vh] items-center justify-center bg-white px-4">
+      <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-10 shadow-2xl shadow-gray-200/50">
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-black">Welcome to <span className="text-orange-500">WALL</span></h1>
+          <p className="mt-2 text-sm text-gray-500">Please sign in to your account.</p>
+        </div>
 
-        <p className="mb-6 text-center text-sm text-gray-500">
-          {loading ? "Processing..." : "Login"}
-        </p>
-
-        <div className="flex flex-col gap-4">
-          {/* Email */}
+        <form onSubmit={onLogin} className="space-y-6">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Email Address</label>
             <input
               type="email"
               value={user.email}
               onChange={(e) => setUser({ ...user, email: e.target.value })}
-              placeholder="Enter your email"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none text-black"
+              className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-black outline-none transition-all focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              required
             />
           </div>
 
-          {/* Password */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Password
-            </label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Password</label>
             <input
               type="password"
               value={user.password}
               onChange={(e) => setUser({ ...user, password: e.target.value })}
-              placeholder="Enter your password"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none text-black"
+              className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-black outline-none transition-all focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              required
             />
           </div>
 
-          {/* Button */}
           <button
-            onClick={onLogin}
-            disabled={buttonDisabled || loading}
-            className={`mt-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition
-              ${
-                buttonDisabled || loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-black hover:bg-gray-800"
-              }`}
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl bg-black py-4 text-sm font-bold text-white shadow-lg transition-all hover:bg-zinc-800 active:scale-[0.98] disabled:bg-gray-200"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Verifying..." : "Sign In"}
           </button>
-        </div>
+        </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
-          <Link href="/signup" className="font-medium text-black hover:underline">
-            Sign up
-          </Link>
+        <p className="mt-8 text-center text-sm text-gray-500">
+          New here? <Link href="/signup" className="font-bold text-black hover:text-orange-600">Create an account</Link>
         </p>
       </div>
     </div>
-  );
-};
-
-export default Login;
+  )
+}
